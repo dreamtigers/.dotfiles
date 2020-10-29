@@ -60,6 +60,13 @@ cd .dotfiles
 ./install.sh
 ```
 
+## Ansible
+
+```sh
+sudo apt-get --yes install ansible
+ansible-playbook --ask-become-pass local.yml
+```
+
 ## License
 
 This work is under the UNLICENSE - see the [UNLICENSE] file for details.

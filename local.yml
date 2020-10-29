@@ -1,0 +1,88 @@
+# Inspired by https://github.com/evuez/home/blob/master/local.yml
+- hosts: localhost
+  become: true
+  vars:
+    home: "{{ansible_env.HOME}}"
+
+  tasks:
+    - name: Install Prerequisites
+      apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+
+    - name: Install packages
+      apt: name={{item}} state=latest
+      loop:
+        - at
+        - curl
+        - docker
+        - firefox
+        - fish
+        - git
+        - htop
+        - jq
+        - mpd
+        - mpv
+        - ncmpcpp
+        - neovim
+        - pass
+        - rbenv
+        - rsync
+        - sway
+        - tmux
+        - transmission
+        - vim
+        - wget
+
+    - name: Install vim-plug
+      get_url:
+        url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        dest: "{{home}}/.config/nvim/autoload/plug.vim"
+        force: yes
+
+    - name: Install vim plugins
+      shell: 'vim +"PlugInstall --sync" +qa'
+
+    # TODO: I know downloading scripts from the scary internet and piping
+    # directly to bash is **wrong**
+    - name: nvm
+      shell: >
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash
+      args:
+          creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+
+    # - name: Check user directories
+    #   stat:
+    #     path: "{{home}}/{{item.dest}}"
+    #   loop:
+    #     - {src: 'Desktop', dest: 'desktop'}
+    #     - {src: 'Documents', dest: 'documents'}
+    #     - {src: 'Downloads', dest: 'downloads'}
+    #     - {src: 'Music', dest: 'music'}
+    #     - {src: 'Pictures', dest: 'pictures'}
+    #     - {src: 'Public', dest: 'public'}
+    #     - {src: 'Templates', dest: 'templates'}
+    #     - {src: 'Videos', dest: 'videos'}
+    #   register: check_user_directories
+
+    # - name: Lowercase user directories
+    #   shell: mv "{{home}}/{{item.item.src}}" "{{home}}/{{item.item.dest}}"
+    #   when: not item.stat.exists
+    #   loop: "{{check_user_directories.results}}"
+
+    # - name: Check user directories configuration
+    #   shell: xdg-user-dir {{item.name}}
+    #   loop:
+    #     - {name: 'DESKTOP', path: 'desktop'}
+    #     - {name: 'DOCUMENTS', path: 'documents'}
+    #     - {name: 'DOWNLOAD', path: 'downloads'}
+    #     - {name: 'MUSIC', path: 'music'}
+    #     - {name: 'PICTURES', path: 'pictures'}
+    #     - {name: 'PUBLICSHARE', path: 'public'}
+    #     - {name: 'TEMPLATES', path: 'templates'}
+    #     - {name: 'VIDEOS', path: 'videos'}
+    #   register: check_user_directories_configuration
+    #   changed_when: False
+
+    # - name: Update user directories configuration
+    #   shell: xdg-user-dirs-update --set "{{item.item.name}}" "{{home}}/{{item.item.path}}"
+    #   when: item.stdout != (home ~ '/' ~ item.item.path)
+    #   loop: "{{check_user_directories_configuration.results}}"
